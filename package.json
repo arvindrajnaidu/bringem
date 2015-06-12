@@ -2,7 +2,6 @@
   "name": "videorummy",
   "version": "1.0.0",
   "description": "irummy: An Ionic project",
-  "mp"
   "dependencies": {
     "coffee-script": "^1.8.0",
     "underscore": "^1.8.3"
