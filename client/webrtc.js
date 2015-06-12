@@ -12,7 +12,7 @@ function pageReady() {
     localVideo = document.getElementById('localVideo');
     remoteVideo = document.getElementById('remoteVideo');
 
-    serverConnection = new WebSocket('ws://videorummy.herokuapp.com:3434');
+    serverConnection = new WebSocket('ws://videorummy.herokuapp.com');
     serverConnection.onmessage = gotMessageFromServer;
 
     var constraints = {
