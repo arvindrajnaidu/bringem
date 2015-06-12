@@ -12,7 +12,12 @@ server.listen(port)
 console.log("http server listening on %d", port)
 
 var wss = new WebSocketServer({server: server})
-console.log("websocket server created")
+
+wss.broadcast = function(data) {
+    for(var i in this.clients) {
+        this.clients[i].send(data);
+    }
+};
 
 wss.on("connection", function(ws) {
     ws.on('message', function(message) {
