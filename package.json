@@ -5,7 +5,8 @@
   "dependencies": {
     "coffee-script": "^1.8.0",
     "underscore": "^1.8.3",
-    "express": "^4.12.4"
+    "express": "^4.12.4",
+    "ws": "^0.7.2"
   },
   "devDependencies": {},
   "main": "gulpfile.js",
