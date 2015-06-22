@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "irummy: An Ionic project",
   "dependencies": {
-    "coffee-script": "^1.8.0",
-    "underscore": "^1.8.3",
     "express": "^4.12.4",
-    "ws": "^0.7.2"
+    "ws": "^0.7.2",
+    "uuid": "^2.0.1",
+    "lodash": "^3.9.3",
+    "async": "^1.2.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "^2.2.5",
+    "chai": "^3.0.0"
+  },
   "main": "gulpfile.js",
   "scripts": {
     "start": "node server/server.js"

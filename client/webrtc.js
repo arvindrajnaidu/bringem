@@ -12,7 +12,8 @@ function pageReady() {
     localVideo = document.getElementById('localVideo');
     remoteVideo = document.getElementById('remoteVideo');
 
-    serverConnection = new WebSocket('wss://videorummy.herokuapp.com');
+    // serverConnection = new WebSocket('wss://videorummy.herokuapp.com');
+    serverConnection = new WebSocket('ws://localhost:5000');
     serverConnection.onmessage = gotMessageFromServer;
 
     var constraints = {
@@ -33,14 +34,30 @@ function getUserMediaSuccess(stream) {
 }
 
 function start(isCaller) {
+
     peerConnection = new RTCPeerConnection(peerConnectionConfig);
-    peerConnection.onicecandidate = gotIceCandidate;
+    peerConnection.onicecandidate = function (event) {
+        debugger
+    };
+
     peerConnection.onaddstream = gotRemoteStream;
     peerConnection.addStream(localStream);
-
-    if(isCaller) {
-        peerConnection.createOffer(gotDescription, errorHandler);
-    }
+    // async.parallel([
+    //         // function (cb) {
+    //         //     peerConnection.onicecandidate = function (event) {
+    //         //         cb(null, event);
+    //         //     };
+    //         // },
+    //         function (cb) {
+    //             peerConnection.createOffer(function (description) {
+    //                 cb(null, description);
+    //             }, function (error) {
+    //                 cb(error);
+    //             });
+    //         }
+    //     ], function (err, results) {
+    //         debugger
+    //     });
 }
 
 function gotMessageFromServer(message) {
@@ -57,8 +74,9 @@ function gotMessageFromServer(message) {
 }
 
 function gotIceCandidate(event) {
-    if(event.candidate != null) {
-        serverConnection.send(JSON.stringify({'ice': event.candidate}));
+    if(event.candidate != null) {        
+        // serverConnection.send(JSON.stringify({'ice': event.candidate}));
+        serverConnection.setLocalDescription(JSON.stringify({action : "shareIce", body : event.candidate}));
     }
 }
 
