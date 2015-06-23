@@ -36,28 +36,35 @@ function getUserMediaSuccess(stream) {
 function start(isCaller) {
 
     peerConnection = new RTCPeerConnection(peerConnectionConfig);
-    peerConnection.onicecandidate = function (event) {
-        debugger
-    };
-
     peerConnection.onaddstream = gotRemoteStream;
     peerConnection.addStream(localStream);
-    // async.parallel([
-    //         // function (cb) {
-    //         //     peerConnection.onicecandidate = function (event) {
-    //         //         cb(null, event);
-    //         //     };
-    //         // },
-    //         function (cb) {
-    //             peerConnection.createOffer(function (description) {
-    //                 cb(null, description);
-    //             }, function (error) {
-    //                 cb(error);
-    //             });
-    //         }
-    //     ], function (err, results) {
-    //         debugger
-    //     });
+    async.parallel([
+            function (cb) {
+                var candidates = [];
+                peerConnection.onicecandidate = function (event) {
+                    console.log("Candidate", event);
+                    if(event.candidate) {
+                        return candidates.push(event);
+                    }
+                    cb(null, candidates);
+                };
+            },
+            function (cb) {
+                peerConnection.createOffer(function (description) {
+                    peerConnection.setLocalDescription(description, function () {                            
+                            cb(null, description);
+                        }, function() {
+                            console.log('set description error')
+                        });                    
+                    
+                }, function (error) {
+                    cb(error);
+                });
+            }
+        ], function (err, results) {
+            var str = JSON.stringify({action : "acceptInvite", body : {ice : results[0], desc : results[1]}});
+
+        });
 }
 
 function gotMessageFromServer(message) {
@@ -71,20 +78,6 @@ function gotMessageFromServer(message) {
     } else if(signal.ice) {
         peerConnection.addIceCandidate(new RTCIceCandidate(signal.ice));
     }
-}
-
-function gotIceCandidate(event) {
-    if(event.candidate != null) {        
-        // serverConnection.send(JSON.stringify({'ice': event.candidate}));
-        serverConnection.setLocalDescription(JSON.stringify({action : "shareIce", body : event.candidate}));
-    }
-}
-
-function gotDescription(description) {
-    console.log('got description');
-    peerConnection.setLocalDescription(description, function () {
-        serverConnection.send(JSON.stringify({'sdp': description}));
-    }, function() {console.log('set description error')});
 }
 
 function gotRemoteStream(event) {
