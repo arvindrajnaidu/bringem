@@ -1,7 +1,7 @@
 var invitesQ = require('./q').invitesQ;
 
 
-module.exports = function Client (ws) {
+module.exports = function Client (ws, options) {
 
   // Server side events
 
@@ -21,7 +21,7 @@ module.exports = function Client (ws) {
     })
   }
 
-  function createInvite (params) {
+  ws.createInvite =  function (params) {
     params.ws = ws;
     invitesQ.push(params, function (err, invite) {
       ws.inviteId = invite.id;
@@ -30,30 +30,19 @@ module.exports = function Client (ws) {
   }
 
   // We expect client to load and try to accept and invite.
-  ws.acceptInvite = function (params) {
-    invitesQ.pop(params, function (err, invite) {
+  ws.findInvite = function () {
+    invitesQ.pop(function (err, invite) {
       if(invite) {
-        ws.inviteId = invite.id;
-        ws.invitor = true;
-
-        // Notify the invitor
-        invite.ws.send(JSON.stringify({event : 'inviteAccepted', invite: {id : invite.id, ice : params.ice, desc : params.desc}}));
-
-        // Notify the guest
-        ws.send(JSON.stringify({event : 'inviteAccepted', invite: {id : invite.id, ice: invite.ice, desc: invite.desc}}));  
-
-        return;
+        ws.send(JSON.stringify({event : 'inviteFound', invite: {id : invite.id, ice: invite.ice, desc: invite.desc}}));
+      } else {
+        ws.send(JSON.stringify({event : 'inviteNotFound', message: "No invites"}));          
       }
-      createInvite(params);
-    })
+    });
   }
 
-  // WebRTC
-  ws.shareIce = function () {
-    // for(var i in this.clients) {
-    //     this.clients[i].send(data);
-    // }
-    // ws.inviteId
+  ws.acceptInvite = function (params) {
+    var invitor = options.findWebSocket(params.inviteId);
+    invitor.send(JSON.stringify({event : 'inviteAccepted', invite: {id : params.inviteId, ice : params.ice, desc : params.desc}}));    
   }
 
   ws.on("message", function incoming (message) {

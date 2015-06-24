@@ -33,50 +33,106 @@ function getUserMediaSuccess(stream) {
     localVideo.src = window.URL.createObjectURL(stream);
 }
 
+function collectCandidates (cb) {
+    var candidates = [];
+    peerConnection.onicecandidate = function (event) {
+        if(event.candidate) {
+            return candidates.push(event.candidate);
+        }
+        cb(null, candidates);
+    };
+}
+
+function createOffer (cb) {
+    peerConnection.createOffer(function (description) {
+        peerConnection.setLocalDescription(description, function () {                            
+            cb(null, description);
+        }, function() {
+            console.log('set description error')
+        });
+    }, function (error) {
+        cb(error);
+    });    
+}
+
+function createAnswer (cb) {
+    peerConnection.createAnswer(function (description) {
+        peerConnection.setLocalDescription(description, function () {                            
+            cb(null, description);
+        }, function() {
+            console.log('set description error')
+        });
+    }, function (error) {
+        cb(error);
+    });
+}
+
 function start(isCaller) {
 
     peerConnection = new RTCPeerConnection(peerConnectionConfig);
     peerConnection.onaddstream = gotRemoteStream;
     peerConnection.addStream(localStream);
-    async.parallel([
-            function (cb) {
-                var candidates = [];
-                peerConnection.onicecandidate = function (event) {
-                    console.log("Candidate", event);
-                    if(event.candidate) {
-                        return candidates.push(event);
-                    }
-                    cb(null, candidates);
-                };
-            },
-            function (cb) {
-                peerConnection.createOffer(function (description) {
-                    peerConnection.setLocalDescription(description, function () {                            
-                            cb(null, description);
-                        }, function() {
-                            console.log('set description error')
-                        });                    
-                    
-                }, function (error) {
-                    cb(error);
-                });
-            }
-        ], function (err, results) {
-            var str = JSON.stringify({action : "acceptInvite", body : {ice : results[0], desc : results[1]}});
 
-        });
+    serverConnection.send(JSON.stringify({action : "findInvite"}));
 }
 
 function gotMessageFromServer(message) {
-    if(!peerConnection) start(false);
 
     var signal = JSON.parse(message.data);
-    if(signal.sdp) {
-        peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp), function() {
-            peerConnection.createAnswer(gotDescription, errorHandler);
-        }, errorHandler);
-    } else if(signal.ice) {
-        peerConnection.addIceCandidate(new RTCIceCandidate(signal.ice));
+    if (signal.event === "inviteNotFound") {
+        
+        // There are no invites to accept. Lets create one
+        async.parallel([
+                collectCandidates,
+                createOffer
+            ], function (err, results) {
+                var str = JSON.stringify({action : "createInvite", body : {ice : results[0], desc : results[1]}});
+                serverConnection.send(str);
+            });
+
+    } else if (signal.event === "inviteFound") {
+
+        // Invite found
+        if(signal.invite.desc.sdp) {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(signal.invite.desc), function() {
+                async.parallel([
+                        collectCandidates,
+                        createAnswer
+                    ], function (err, results) {
+                        var str = JSON.stringify({action : "acceptInvite", body : {inviteId: signal.invite.id, ice : results[0], desc : results[1]}});
+                        serverConnection.send(str);
+                    });
+            }, errorHandler);
+        }
+
+        if(signal.invite.ice) {
+            signal.invite.ice.forEach(function (ice) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(ice));
+            });
+        }
+    } else if (signal.event === "inviteAccepted") {
+
+        // Invite Accepted
+        if(signal.invite.desc.sdp) {
+
+            peerConnection.setRemoteDescription(new RTCSessionDescription(signal.invite.desc), function() {
+                // async.parallel([
+                //         collectCandidates,
+                //         createAnswer
+                //     ], function (err, results) {
+                //         debugger
+
+                //         var str = JSON.stringify({action : "createInvite", body : {ice : results[0], desc : results[1]}});
+                //         // serverConnection.send(str);
+                //     });
+            }, errorHandler);
+        }
+
+        if(signal.invite.ice) {
+            signal.invite.ice.forEach(function (ice) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(ice));
+            });
+        }
     }
 }
 

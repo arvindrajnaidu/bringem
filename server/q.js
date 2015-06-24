@@ -14,7 +14,7 @@ function oneToOneMatch (q) {
             });
       cb(null, inviteId);
     },
-    pop : function (payload, cb) {
+    pop : function (cb) {
       var popped = q.shift()
       cb(null, popped);
     },
