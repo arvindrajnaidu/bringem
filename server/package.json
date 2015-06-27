@@ -1,7 +1,7 @@
 {
-  "name": "bringem",
+  "name": "bringem-server",
   "version": "1.0.0",
-  "description": "irummy: An Ionic project",
+  "description": "Bringem",
   "dependencies": {
     "express": "^4.12.4",
     "ws": "^0.7.2",
@@ -15,7 +15,7 @@
   },
   "main": "gulpfile.js",
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC"

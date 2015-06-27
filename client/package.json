@@ -1,11 +1,9 @@
 {
-  "name": "bringem",
+  "name": "bringem-client",
   "version": "1.0.0",
-  "description": "irummy: An Ionic project",
+  "description": "Bringem solicits",
   "dependencies": {
-    "express": "^4.12.4",
     "ws": "^0.7.2",
-    "uuid": "^2.0.1",
     "lodash": "^3.9.3",
     "async": "^1.2.1"
   },

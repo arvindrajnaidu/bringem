@@ -1,7 +1,8 @@
-var invitesQ = require('./q').invitesQ;
+var invitesQ = require('./q').invitesQ,
+    _ = require('lodash'),
+    WebSocketServer = require("ws").Server;
 
-
-module.exports = function Client (ws, options) {
+function Client (ws, options) {
 
   // Server side events
 
@@ -58,5 +59,24 @@ module.exports = function Client (ws, options) {
     invitesQ.remove(ws.inviteId, function (err) {
     });
   });
+}
 
+
+module.exports = function (server) {
+  var wss = new WebSocketServer({server: server})
+
+  function findWebSocket (inviteId) {
+    var ws = _.find(wss.clients, function (client) {
+      return client.inviteId === inviteId
+    });
+    return ws;
+  }
+
+  wss.on("connection", function(ws) {
+
+    Client(ws, {
+      findWebSocket : findWebSocket
+    });
+
+  });
 }

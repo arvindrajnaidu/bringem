@@ -1,9 +1,8 @@
-var WebSocketServer = require("ws").Server,
-    http = require("http"),
+var http = require("http"),
     express = require("express"),
     app = express(),
     port = process.env.PORT || 5000,
-    client = require('./client'),
+    bringem = require('./index'),
     _ = require('lodash'),
     invitesQ = require('./q').invitesQ;
 
@@ -11,23 +10,7 @@ app.use(express.static(process.cwd() + "/client"))
 
 var server = http.createServer(app)
 
-var wss = new WebSocketServer({server: server})
-
-function findWebSocket (inviteId) {
-  var ws = _.find(wss.clients, function (client) {
-    return client.inviteId === inviteId
-  });
-  return ws;
-}
-
-wss.on("connection", function(ws) {
-
-  client(ws, {
-    findWebSocket : findWebSocket
-  });
-
-});
-
+var bringem = bringem(server);
 
 if(require.main === module) {
   console.log(port);
