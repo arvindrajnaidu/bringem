@@ -1,7 +1,7 @@
 {
   "name": "bringem",
-  "version": "1.0.0",
-  "description": "irummy: An Ionic project",
+  "version": "1.0.1",
+  "description": "A webrtc peer finder",
   "dependencies": {
     "express": "^4.12.4",
     "ws": "^0.7.2",

@@ -13,7 +13,6 @@ var server = http.createServer(app)
 var bringem = bringem(server);
 
 if(require.main === module) {
-  console.log(port);
   server.listen(port);
 } else {
   module.exports.server = server;
