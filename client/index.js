@@ -64,7 +64,7 @@ function Bringem (window, navigator, params) {
     }
 
     function createDataChannel () {
-        gameChannel = peerConnection.createDataChannel("game", {reliable: false});        
+        gameChannel = peerConnection.createDataChannel("game", {reliable: true, ordered: true});        
         gameChannel.onopen = params.onDataChannel;
         gameChannel.onmessage = params.onRemoteMessage;
     }
