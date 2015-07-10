@@ -1,6 +1,6 @@
 {
   "name": "bringem",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A webrtc peer finder",
   "dependencies": {
     "express": "^4.12.4",

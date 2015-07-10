@@ -1,6 +1,6 @@
 {
-  "name": "bringem-client",
-  "version": "1.0.0",
+  "name": "bringem",
+  "version": "1.0.2",
   "description": "Bringem solicits",
   "dependencies": {
     "ws": "^0.7.2",
