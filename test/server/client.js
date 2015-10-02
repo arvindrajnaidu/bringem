@@ -6,21 +6,21 @@ var chai = require('chai'),
 
 // var hostname = "192.168.99.100";
 // var hostname = "localhost";
-var hostname = "ec2-54-153-102-105.us-west-1.compute.amazonaws.com";
-
+// var hostname = "ec2-54-153-102-105.us-west-1.compute.amazonaws.com";
+var hostname = "bringem.herokuapp.com";
 
 describe('Invites', function() {
 
   var ws1, ws2;
 
   before(function (done) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
     Server.server.listen(5000, done);
   })
 
   beforeEach(function (done) {
-    ws1 = new WebSocket('wss://' + hostname + ':443', {secure: false});
-    ws2 = new WebSocket('wss://' + hostname + ':443', {secure: false});
+    ws1 = new WebSocket('wss://' + hostname);
+    ws2 = new WebSocket('wss://' + hostname);
     async.parallel ([
         function (cb) {
           ws1.on('open', function () {
