@@ -1,0 +1,9 @@
+openssl genrsa -des3 -passout pass:x -out irummy.pass.key 2048
+
+openssl rsa -passin pass:x -in irummy.pass.key -out irummy.key
+
+rm irummy.pass.key
+
+openssl req -new -key irummy.key -out irummy.csr
+
+openssl x509 -req -days 365 -in irummy.csr -signkey irummy.key -out irummy.crt

@@ -106,35 +106,33 @@ function Bringem (window, navigator, params) {
             gameChannel.onopen = params.onDataChannel;
             gameChannel.onmessage = params.onRemoteMessage;
 
-            serverConnection.send(JSON.stringify({action : "findInvite"}));
-        }        
+            // serverConnection.send(JSON.stringify({action : "findInvite"}));
+
+            async.parallel([
+                    collectCandidates,
+                    createOffer
+                ], function (err, results) {
+                    var str = JSON.stringify({action : "acceptInvite", body : {ice : results[0], desc : results[1]}});
+                    serverConnection.send(str);
+                });            
+        }  
+
     }
 
     function gotMessageFromServer(message) {
 
         var signal = JSON.parse(message.data);
-        if (signal.event === "inviteNotFound") {
-            
-            // There are no invites to accept. Lets create one
-            async.parallel([
-                    collectCandidates,
-                    createOffer
-                ], function (err, results) {
-                    var str = JSON.stringify({action : "createInvite", body : {ice : results[0], desc : results[1]}});
-                    serverConnection.send(str);
-                });
+        if (signal.event === "inviteAccepted") {
 
-        } else if (signal.event === "inviteFound") {
-
-            // Invite found
+            // Invite found and accepted
             if(signal.invite.desc.sdp) {
                 peerConnection.setRemoteDescription(new RTCSessionDescription(signal.invite.desc), function() {
-                    // // Create a data channel before you answer
+                    // Create a data channel before you answer
                     async.parallel([
                             collectCandidates,
                             createAnswer
                         ], function (err, results) {
-                            var str = JSON.stringify({action : "acceptInvite", body : {inviteId: signal.invite.id, ice : results[0], desc : results[1]}});
+                            var str = JSON.stringify({action : "rsvp", body : {inviteId: signal.invite.id, ice : results[0], desc : results[1]}});
                             serverConnection.send(str);
                         });
                 }, errorHandler);
@@ -145,7 +143,7 @@ function Bringem (window, navigator, params) {
                     peerConnection.addIceCandidate(new RTCIceCandidate(ice));
                 });
             }
-        } else if (signal.event === "inviteAccepted") {
+        } else if (signal.event === "rsvp") {
 
             // Invite Accepted
             if(signal.invite.desc.sdp) {
@@ -157,7 +155,6 @@ function Bringem (window, navigator, params) {
                     peerConnection.addIceCandidate(new RTCIceCandidate(ice));
                 });
             }
-
         }
     }
 

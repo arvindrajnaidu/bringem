@@ -1,13 +1,14 @@
 {
   "name": "bringem",
-  "version": "1.0.2",
-  "description": "A webrtc peer finder",
+  "version": "1.1.0",
+  "description": "A peer finder",
   "dependencies": {
+    "async": "^1.2.1",
+    "bunyan": "^1.5.1",
     "express": "^4.12.4",
-    "ws": "^0.7.2",
-    "uuid": "^2.0.1",
     "lodash": "^3.9.3",
-    "async": "^1.2.1"
+    "uuid": "^2.0.1",
+    "ws": "^0.7.2"
   },
   "devDependencies": {
     "mocha": "^2.2.5",
