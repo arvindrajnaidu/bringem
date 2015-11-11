@@ -45,7 +45,6 @@ describe('Invites', function() {
     ws1.on('message', function (data, flags) {
       var resp = JSON.parse(data);
       assert.ok(resp.event, "inviteCreated");
-      assert.equal(Server.invitesQ.q().length, 1);
       done();
     });
   });
@@ -59,7 +58,6 @@ describe('Invites', function() {
         function (cb) {
           ws1.on('message', function (data) {
             var resp = JSON.parse(data);
-            console.log("W1 resp event" , resp.body)
             if(resp.event === "inviteCreated") {
               cb(null, resp.body);
             }
@@ -68,7 +66,6 @@ describe('Invites', function() {
         function (cb) {
           ws2.on('message', function (data) {
             var resp = JSON.parse(data);
-            console.log("W2 resp event" , resp.body)
             if(resp.event === "inviteFound") {
               cb(null, resp.body);  
             }
